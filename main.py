@@ -1,35 +1,35 @@
-import locale
+import csv
+from pathlib import Path
 
-from item import Item
+ufos = {}
+output_list = []
 
 
 def main():
-    shopping_list = []
-    locale.setlocale(locale.LC_ALL, '')
-    boolean = True
+    file_path = Path.cwd() / "ufo.csv"
 
-    while boolean:
-        item_name = input("Enter an item to purchase (NA to end): ")
+    if file_path.exists():
+        with file_path.open() as my_file:
+            csv_reader = csv.reader(my_file)
+            next(csv_reader)  # skip headings
+            for line in csv_reader:
+                type = line[4]
+                if type in ufos:
+                    ufos[type] += 1
+                else:
+                    ufos[type] = 1
 
-        if item_name.upper() != "NA":
-            item_units = input("Units: ")
-            item_quantity = int(input("Quantity: "))
-            item_price = float(input("Price: "))
-
-            item = Item(item_name, item_units, item_quantity, item_price)
-
-            shopping_list.append(item)
-        else:
-            break
-
-    print("Shopping List")
-    total = 0
-    for item in shopping_list:
-        item_total = item.price * item.quantity
-        print(f"{item.name} {item.units} {item.quantity} {locale.currency(item.price, grouping=True)} {locale.currency(item_total, grouping=True)}")
-        total = item_total + total
-        print(f"Total: {locale.currency(total, grouping=True)}")
+    for key in ufos:
+        print(f"{key} {ufos[key]}")
+        output_list.append([key, ufos[key]])
 
 
-if __name__ == '__main__':
+def output():
+    with open('./output.csv', 'wt') as f:
+        csv_writer = csv.writer(f, delimiter='|')
+        csv_writer.writerows(output_list)
+
+
+if __name__ == "__main__":
     main()
+    output()
